@@ -9,6 +9,10 @@ Installation
 ------------
 Just run main.py file.
 
+ScreenShot
+----------
+![ScreenShot](http://i.imgur.com/tNZP30L.png)
+
 Requirements
 ------------
  - Python 3.x (tested on 3.4.1)
