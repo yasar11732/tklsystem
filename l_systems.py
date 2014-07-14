@@ -118,7 +118,6 @@ class Lindenmayer(ImageDraw):
                 else:
                     self.forward()
 
-        
         # 2) Resize the coordinates to fit into image
         minx, miny, maxx, maxy = 0, 0, 0, 0
 
@@ -134,6 +133,7 @@ class Lindenmayer(ImageDraw):
             if y > maxy:
                 maxy = y
         self.shift_coordinates(-1 * minx, -1 * miny)
+        
 
         cw, ch = maxx-minx, maxy-miny
 

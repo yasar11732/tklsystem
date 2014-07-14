@@ -11,7 +11,7 @@ Just run main.py file.
 
 ScreenShot
 ----------
-![ScreenShot](http://i.imgur.com/tNZP30L.png)
+![ScreenShot](http://i.imgur.com/KHkV5Uq.png)
 
 Requirements
 ------------

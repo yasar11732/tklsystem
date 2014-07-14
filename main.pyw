@@ -1,13 +1,20 @@
 import tkinter as tk
+import tkinter.filedialog
 from PIL import Image, ImageTk
 from l_systems import Lindenmayer, LindenmayerException
+
+
+## To fill filebrowswer
+from os import makedirs
+from os.path import expanduser, isdir, basename, join
+from glob import glob
     
 class Main(tk.Frame):
 
     w = 600
     h = 600
     
-    def __init__(self,parent, *args, **kwargs):
+    def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
 
         self.parent = parent
@@ -28,6 +35,12 @@ class Main(tk.Frame):
         self.color3 = "#00dd00"
         self.color4 = "#0000dd"
 
+        self.lsf_dir = expanduser(join("~", "lsf-files"))
+        if not isdir(self.lsf_dir):
+            from shutil import copytree
+            from os.path import dirname
+            examples = join(dirname(__file__),"examples")
+            copytree(examples, self.lsf_dir)
 
         self.entries = tk.Frame(self)
         self.entries.grid(row=0, column=0, sticky=tk.N)
@@ -76,20 +89,32 @@ class Main(tk.Frame):
         tk.Button(self.buttons, text="load", command=self.load_from_file).grid(column=2, row=0)
         tk.Button(self.buttons, text="save image", command=self.save_image).grid(column=3, row=0)
         
-
-        ### Preset Buttons ###
-        self.presets = tk.Frame(self)
-        self.presets.grid(row=0, column=2, sticky=tk.N)
-        tk.Label(self.presets,  text="Examples", font="Helvetica 14 bold").grid(column=0, row=0)
-        tk.Button(self.presets, text="Koch Snowflake", command=self.snowflake).grid(column=0, row=1, padx=5, pady=5)
-        tk.Button(self.presets, text="Kevs Tree", command=self.kevs_tree).grid(column=0, row=2, padx=5, pady=5)
-        tk.Button(self.presets, text="Custom 1", command=self.custom1).grid(column=0, row=3, padx=5, pady=5)
+        ### File List ###
+        self.right = tk.Frame(self)
+        self.right.grid(row=0, column=2)
+        self.filebrowser = tk.Listbox(self.right)
+        self.filebrowser.grid(row=0, column=0)
+        self.filebrowser.bind("<<ListboxSelect>>", self.load_selected_file)
+        self.fill_file_browser()
 
         ### Canvas ###
         self.cv = tk.Canvas(self, width=self.w, height=self.h, bg='white')
         self.cv.grid(column=1, row=0)
 
         self.grid()
+
+    def load_selected_file(self, event):
+        sel = self.filebrowser.curselection()
+        fpath = self.files[self.filebrowser.get(sel[0])]
+        self.load_from_file(fpath)
+
+    def fill_file_browser(self):
+        self.files = {}
+        print("globbing",join(self.lsf_dir, "*.lsf"))
+        for f in glob(join(self.lsf_dir, "*.lsf")):
+            fname = basename(f)
+            self.files[fname] = f
+            self.filebrowser.insert(0,fname)
 
     def pick_color(self, colorname, label):
 
@@ -103,10 +128,17 @@ class Main(tk.Frame):
         label['text'] = new_color
         label['bg']   = new_color
 
-        
-
     def save_to_file(self):
-        with tk.filedialog.asksaveasfile() as f:
+
+        fn = tk.filedialog.asksaveasfilename(initialdir=self.lsf_dir,
+                                             filetypes=(('L-System Formula File','*.lsf'), ('All files', '*.*')))
+
+        if fn:
+            if not fn.endswith(".lsf"):
+                fn += ".lsf"
+
+        
+        with open(fn,"w") as f:
             f.write("\n".join((self.iterations.get(),
                               self.angle.get(),
                               self.axiom.get(),
@@ -117,9 +149,12 @@ class Main(tk.Frame):
                               self.constants.get(),
                                "EOF")))
 
-    def load_from_file(self):
-    
-        with tk.filedialog.askopenfile() as f:
+    def load_from_file(self, fname=None):
+        if not fname:
+            fname = tk.filedialog.askopenfilename(initialdir=self.lsf_dir,
+                                                  filetypes = (("L-System Formula","*.lsf"),("all files","*.*")))
+
+        with open(fname, "r") as f:
 
             x = f.readlines()
             print(x)
@@ -181,41 +216,6 @@ class Main(tk.Frame):
 
         self.active_image = ImageTk.PhotoImage(temp)
         self.cv.create_image((self.w/2,self.h/2), image=self.active_image)
-
-    def snowflake(self):
-
-        self.fill_entries(
-            it       = 6,
-            ang      = 60,
-            axi      = "F++F++F",
-            r1       = "F:F-F++F-F"
-        )
-
-        self.render_image()
-
-    def kevs_tree(self):
-
-        self.fill_entries(
-            it       = 5,
-            ang      = 22,
-            axi      = "----F",
-            r1       = "F:1FF-[3-F+F+F]+[2+F-F-F]"
-        )
-
-        self.render_image()
-
-    def custom1(self):
-
-        self.fill_entries(
-            it       = 7,
-            ang      = 90,
-            axi      = "AF++BF++AF",
-            r1       = "A:BF-AF++BF-AF",
-            r2       = "B:AF+BF--AF+BF",
-            cons     = "AB"
-        )
-
-        self.render_image()
 
     def fill_entries(self, it="", ang="", cons="", axi="", r1="", r2="", r3="", r4=""):
 
