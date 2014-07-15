@@ -106,7 +106,7 @@ class Lindenmayer(ImageDraw):
         
 
     def execute(self):
-        self._coordinate_list = [("COLOR",self.color1)]
+        self._coordinate_list = [("COLOR",self.color1), self.pos]
 
         # 1) Calculate coordinates
         for x in self.string:
@@ -132,8 +132,6 @@ class Lindenmayer(ImageDraw):
                 maxx = x
             if y > maxy:
                 maxy = y
-        self.shift_coordinates(-1 * minx, -1 * miny)
-        
 
         cw, ch = maxx-minx, maxy-miny
 
@@ -143,6 +141,13 @@ class Lindenmayer(ImageDraw):
             scale_factor = self.im.size[0] / cw
 
         self.scale_coordinates(scale_factor, scale_factor)
+
+        left_margin = (self.im.size[0] - cw*scale_factor) / 2
+        top_margin   = (self.im.size[1] - ch*scale_factor) / 2
+
+        minx, miny = minx * scale_factor, miny*scale_factor
+
+        self.shift_coordinates(-1 * minx + left_margin, -1 * miny + top_margin)
 
         self.finalize()
 
@@ -171,8 +176,18 @@ class Lindenmayer(ImageDraw):
 
     def right(self): self.heading += self.angle
     def left(self):  self.heading -= self.angle
-    def up(self):    self.pendown = False
-    def down(self):  self.pendown = True
+
+    def up(self):
+        self.pendown = False
+        self._coordinate_list.append(("LB",""))
+    def down(self):
+        self.pendown = True
+        self._coordinate_list.append(self.pos)
+
+    def jump(self):
+        self.up()
+        self.forward()
+        self.down()
 
     def c1(self): self._coordinate_list.append(("COLOR",self.color1))
     def c2(self): self._coordinate_list.append(("COLOR",self.color2))

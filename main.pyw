@@ -1,5 +1,6 @@
 import tkinter as tk
 import tkinter.filedialog
+import tkinter.messagebox
 from PIL import Image, ImageTk
 from l_systems import Lindenmayer, LindenmayerException
 
@@ -91,9 +92,15 @@ class Main(tk.Frame):
         
         ### File List ###
         self.right = tk.Frame(self)
-        self.right.grid(row=0, column=2)
-        self.filebrowser = tk.Listbox(self.right)
-        self.filebrowser.grid(row=0, column=0)
+        self.right.grid(row=0, column=2, sticky=(tk.N+tk.S))
+        self.fscroll = tk.Scrollbar(self.right)
+        self.fscroll.grid(row=0,column=1, sticky=(tk.N+tk.S))
+
+        self.filebrowser = tk.Listbox(self.right, yscrollcommand=self.fscroll.set, height=20)
+        self.filebrowser.grid(row=0,column=0)
+
+        self.fscroll.config(command=self.filebrowser.yview)
+
         self.filebrowser.bind("<<ListboxSelect>>", self.load_selected_file)
         self.fill_file_browser()
 
@@ -190,6 +197,21 @@ class Main(tk.Frame):
         return rules
 
     def render_image(self):
+
+        x = self.iterations.get()
+
+        try:
+            x = int(x)
+        except ValueError:
+            tk.messagebox.showerror("Missing Information","You didn't specify iterations")
+            return
+
+        if x > 15:
+            if not tk.messagebox.askyesno("Iterations too high","Number of iterations is"
+                                                                "too high. This might cause performance problems."
+                                                                "Are you sure about this?"):
+                return
+
         temp = Image.new("RGB", (self.w, self.h), (255,255,255))
         lin = Lindenmayer(temp)
 
