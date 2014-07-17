@@ -21,7 +21,7 @@ class Turtle(object):
         }
 
         self.string = instructions
-        self._angle = angle
+        self.angle = angle
         self.placeholders = placeholders
         self.null_characters = null_characters
         
@@ -84,8 +84,8 @@ class Turtle(object):
         if self.pendown:
             self.lines.append(tuple((x,y,x2,y2)))
 
-    def right(self): self._heading += self._angle
-    def left(self):  self._heading -= self._angle
+    def right(self): self._heading += self.angle
+    def left(self):  self._heading -= self.angle
 
     def up(self): self.pendown = False
     def down(self): self.pendown = True

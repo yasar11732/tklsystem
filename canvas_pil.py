@@ -74,7 +74,7 @@ class DrawTurtle(Thread):
         turtle = self.turtle
         colors = self.colors
         
-        if self.load_from_cache(turtle.string):
+        if self.load_from_cache():
             return
 
         self.canvas.begin_new()
@@ -130,29 +130,34 @@ class DrawTurtle(Thread):
 
         self.canvas.update_image()
 
-        self.save_to_cache(turtle.string)
+        self.save_to_cache()
 
-    def load_from_cache(self, string):
-
+    def get_cache_filename(self):
         m = hashlib.sha256()
-        m.update(string.encode('utf-8'))
+        m.update(str(self.turtle.angle).encode('utf-8'))
+        m.update(";".join("{}:{}".format(x,y) for x,y in self.colors.items()).encode('utf-8'))
+        m.update(self.turtle.string.encode('utf-8'))
 
-        filename = join(image_cache_dir, m.hexdigest() + ".jpg")
+        return join(image_cache_dir, m.hexdigest() + ".jpg")
+        
+    def load_from_cache(self):
+
+        filename = self.get_cache_filename()
 
         if not isfile(filename):
+            print("Couldnt find cached image")
             return False
 
         self.canvas.set_image(Image.open(filename))
         self.canvas.update_image()
+        print("Loaded image from cache")
         return True
 
     
-    def save_to_cache(self, string):
-        
-        m = hashlib.sha256()
-        m.update(string.encode('utf-8'))
+    def save_to_cache(self):
+        print("Saving image to cache")
 
-        filename = join(image_cache_dir, m.hexdigest() + ".jpg")
+        filename = self.get_cache_filename()
 
         if not isdir(image_cache_dir):
             makedirs(image_cache_dir)

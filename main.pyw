@@ -5,7 +5,7 @@ except ImportError:
     _pil_available = False
 
 # For testing
-_pil_available = False
+# _pil_available = False
 
 if _pil_available:
     from canvas_pil import TurtleCanvas, DrawTurtle
@@ -82,6 +82,11 @@ class Main(tk.Frame):
         self.constants = tk.StringVar()
 
         self.status_text = tk.StringVar()
+
+        if _pil_available:
+            self.status_text.set("Using PIL for rendering")
+        else:
+            self.status_text.set("Using tk Canvas for rendering")
 
         self.color1 = "#000000"
         self.color2 = "#dd0000"
