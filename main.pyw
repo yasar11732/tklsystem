@@ -1,9 +1,25 @@
+_pil_available = True
+try:
+    import PIL
+except ImportError:
+    _pil_available = False
+
+# For testing
+# _pil_available = False
+
+if _pil_available:
+    from canvas_pil import TurtleCanvas
+else:
+    from canvas_tk import TurtleCanvas
+
 import tkinter as tk
 import tkinter.filedialog
 import tkinter.messagebox
-from PIL import Image, ImageTk
-from l_systems import Lindenmayer, LindenmayerException
 
+from l_system_utils import cached_expand_string
+from lsturtle import Turtle
+
+import sys
 
 ## To fill filebrowswer
 from os import makedirs
@@ -88,7 +104,12 @@ class Main(tk.Frame):
         tk.Button(self.buttons, text="render", command=self.render_image).grid(column=0, row=0)
         tk.Button(self.buttons, text="save", command=self.save_to_file).grid(column=1, row=0)
         tk.Button(self.buttons, text="load", command=self.load_from_file).grid(column=2, row=0)
-        tk.Button(self.buttons, text="save image", command=self.save_image).grid(column=3, row=0)
+        save_im_button = tk.Button(self.buttons, text="save image", command=self.save_image)
+
+        if not _pil_available:
+            save_im_button['state'] = tk.DISABLED
+
+        save_im_button.grid(column=3, row=0)
         
         ### File List ###
         self.right = tk.Frame(self)
@@ -105,10 +126,16 @@ class Main(tk.Frame):
         self.fill_file_browser()
 
         ### Canvas ###
-        self.cv = tk.Canvas(self, width=self.w, height=self.h, bg='white')
+        self.cv = TurtleCanvas(self, width=self.w, height=self.h, bg='white')
         self.cv.grid(column=1, row=0)
 
         self.grid()
+
+        # Load command line argument
+        try:
+            self.load_from_file(fname=sys.argv[1])
+        except IndexError:
+            pass
 
     def load_selected_file(self, event):
         sel = self.filebrowser.curselection()
@@ -117,7 +144,7 @@ class Main(tk.Frame):
 
     def fill_file_browser(self):
         self.files = {}
-        print("globbing",join(self.lsf_dir, "*.lsf"))
+
         for f in glob(join(self.lsf_dir, "*.lsf")):
             fname = basename(f)
             self.files[fname] = f
@@ -140,21 +167,25 @@ class Main(tk.Frame):
         fn = tk.filedialog.asksaveasfilename(initialdir=self.lsf_dir,
                                              filetypes=(('L-System Formula File','*.lsf'), ('All files', '*.*')))
 
-        if fn:
-            if not fn.endswith(".lsf"):
-                fn += ".lsf"
-
+        if not fn:
+            return
         
-        with open(fn,"w") as f:
-            f.write("\n".join((self.iterations.get(),
-                              self.angle.get(),
-                              self.axiom.get(),
-                              self.rule1.get(),
-                              self.rule2.get(),
-                              self.rule3.get(),
-                              self.rule4.get(),
-                              self.constants.get(),
-                               "EOF")))
+        if not fn.endswith(".lsf"):
+            fn += ".lsf"
+
+        try:
+            with open(fn,"w") as f:
+                f.write("\n".join((self.iterations.get(),
+                                  self.angle.get(),
+                                  self.axiom.get(),
+                                  self.rule1.get(),
+                                  self.rule2.get(),
+                                  self.rule3.get(),
+                                  self.rule4.get(),
+                                  self.constants.get(),
+                                   "EOF")))
+        except Exception as e:
+            tkinter.messagebox.showerror("Couldn't save", e)
 
     def load_from_file(self, fname=None):
         if not fname:
@@ -164,7 +195,6 @@ class Main(tk.Frame):
         with open(fname, "r") as f:
 
             x = f.readlines()
-            print(x)
             self.iterations.set(x[0].strip())
             self.angle.set(x[1].strip())
             self.axiom.set(x[2].strip())
@@ -181,7 +211,7 @@ class Main(tk.Frame):
         with tk.filedialog.asksaveasfile(filetypes=(('Jpeg Image','*.jpg;*.jpeg;*.JPEG;*.JPG'),
                                                     ('Bitmap Image','*.bmp'),
                                                     ('Png Image','*.png'))) as f:
-            self.active_pimage.save(f)
+            self.cv.pil_image.save(f)
 
         
 
@@ -198,46 +228,40 @@ class Main(tk.Frame):
 
     def render_image(self):
 
-        x = self.iterations.get()
+        iterations = self.iterations.get()
+        angle      = self.angle.get()
+        string      = self.axiom.get()
+        rules      = self.get_rules()
+        constants  = self.constants.get()
 
         try:
-            x = int(x)
+            iterations = int(iterations)
         except ValueError:
             tk.messagebox.showerror("Missing Information","You didn't specify iterations")
             return
 
-        if x > 15:
+        try:
+            angle = int(angle)
+        except ValueError:
+            tk.messagebox.showerror("Missing Information","You didn't specify angle")
+            return
+
+        if iterations > 15:
             if not tk.messagebox.askyesno("Iterations too high","Number of iterations is"
                                                                 "too high. This might cause performance problems."
                                                                 "Are you sure about this?"):
                 return
 
-        temp = Image.new("RGB", (self.w, self.h), (255,255,255))
-        lin = Lindenmayer(temp)
+        # Produce string
+        for _ in range(iterations):
+            string = cached_expand_string(string, rules)
 
-        try:
+        # Make turtle
+        t = Turtle(string, angle, placeholders=["1","2","3","4"], null_characters=constants)
 
-            lin.init(
-                iterations = int(self.iterations.get()),
-                angle      = int(self.angle.get()),
-                axiom      = self.axiom.get(),
-                rules      = self.get_rules(),
-                constants  = self.constants.get(),
-                color1     = self.color1,
-                color2     = self.color2,
-                color3     = self.color3,
-                color4     = self.color4
-            )
+        self.cv.delete("all")
 
-        except LindenmayerException as e:
-
-            tk.messagebox.showwarning("Bir hata oluştu",e)
-            return
-
-        self.active_pimage = temp # Use this to save to file
-
-        self.active_image = ImageTk.PhotoImage(temp)
-        self.cv.create_image((self.w/2,self.h/2), image=self.active_image)
+        self.cv.draw_turtle(t, colors={"1": self.color1, "2": self.color2, "3": self.color3, "4": self.color4})
 
     def fill_entries(self, it="", ang="", cons="", axi="", r1="", r2="", r3="", r4=""):
 
@@ -255,7 +279,6 @@ class Main(tk.Frame):
         self.parent.mainloop()
 
 if __name__ == "__main__":
-
     root = tk.Tk()
     app = Main(root)
     root.bind("<Return>", lambda _: app.render_image())

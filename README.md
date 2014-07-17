@@ -11,12 +11,17 @@ Just run main.py file.
 
 ScreenShot
 ----------
-![ScreenShot](http://i.imgur.com/KHkV5Uq.png)
+![ScreenShot](http://i.imgur.com/EWOaBJD.png)
 
 Requirements
 ------------
  - Python 3.x (tested on 3.4.1)
- - PIL or Pillow     (tested on Pillow 2.5.1)
+ 
+Optional
+---------
+ - PIL or Pillow (tested on Pillow 2.5.1)
+ 
+Having PIL enables faster rendering and image caching. It can improve speed drastically.
 
 Author
 ------
