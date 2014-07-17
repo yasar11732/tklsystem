@@ -5,7 +5,7 @@ except ImportError:
     _pil_available = False
 
 # For testing
-# _pil_available = False
+_pil_available = False
 
 if _pil_available:
     from canvas_pil import TurtleCanvas, DrawTurtle
