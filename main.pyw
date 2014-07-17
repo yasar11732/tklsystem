@@ -5,12 +5,12 @@ except ImportError:
     _pil_available = False
 
 # For testing
-# _pil_available = False
+_pil_available = False
 
 if _pil_available:
-    from canvas_pil import TurtleCanvas
+    from canvas_pil import TurtleCanvas, DrawTurtle
 else:
-    from canvas_tk import TurtleCanvas
+    from canvas_tk import TurtleCanvas, DrawTurtle
 
 import tkinter as tk
 import tkinter.filedialog
@@ -19,12 +19,46 @@ import tkinter.messagebox
 from l_system_utils import cached_expand_string
 from lsturtle import Turtle
 
+from threading import Thread, Event
+
 import sys
 
 ## To fill filebrowswer
 from os import makedirs
 from os.path import expanduser, isdir, basename, join
 from glob import glob
+
+class CreateTurtleString(Thread):
+
+    def __init__(self, string, rules, iterations, *args, **kwargs):
+
+        super(CreateTurtleString, self).__init__(*args, **kwargs)
+        self.string = string
+        self.rules = rules
+        self.iterations = iterations
+        self._job_done = Event()
+        self._stop_creating = Event()
+
+    def job_done(self):
+        return self._job_done.isSet()
+
+    def stop_creating(self):
+        self._stop_creating.set()
+
+    def run(self):
+        string = self.string
+        iterations = self.iterations
+        rules = self.rules
+
+        for _ in range(iterations):
+            if self._stop_creating.isSet():
+                break
+            string = cached_expand_string(string, rules)
+
+        self.string = string
+        self._job_done.set()
+
+        
     
 class Main(tk.Frame):
 
@@ -46,6 +80,8 @@ class Main(tk.Frame):
         self.rule3 = tk.StringVar()
         self.rule4 = tk.StringVar()
         self.constants = tk.StringVar()
+
+        self.status_text = tk.StringVar()
 
         self.color1 = "#000000"
         self.color2 = "#dd0000"
@@ -128,6 +164,12 @@ class Main(tk.Frame):
         ### Canvas ###
         self.cv = TurtleCanvas(self, width=self.w, height=self.h, bg='white')
         self.cv.grid(column=1, row=0)
+
+        ### Status Bar ###
+        tk.Label(self, textvariable=self.status_text).grid(row=2, columnspan=3, sticky=tk.W)
+
+        self.drawing_thread = None
+        self.turtle_string_creation = None
 
         self.grid()
 
@@ -226,13 +268,28 @@ class Main(tk.Frame):
 
         return rules
 
-    def render_image(self):
+    def render_image_continue(self):
+        if self.turtle_string_creation.job_done():
+            self.status_text.set("Rendering image")
+            angle      = int(self.angle.get())
+            constants  = self.constants.get()
+            
+            t = Turtle(self.turtle_string_creation.string, angle, placeholders=["1","2","3","4"], null_characters=constants)
+            if self.drawing_thread:
+                self.drawing_thread.stop_drawing()
+                self.drawing_thread.join()
 
-        iterations = self.iterations.get()
+            self.drawing_thread = DrawTurtle(self.cv, t, colors={"1": self.color1, "2": self.color2, "3": self.color3, "4": self.color4}, daemon=True)
+            self.drawing_thread.start()
+        else:
+            self.after(100, self.render_image_continue)
+            
+    def render_image(self):
         angle      = self.angle.get()
+        iterations = self.iterations.get()
         string      = self.axiom.get()
         rules      = self.get_rules()
-        constants  = self.constants.get()
+        
 
         try:
             iterations = int(iterations)
@@ -253,15 +310,14 @@ class Main(tk.Frame):
                 return
 
         # Produce string
-        for _ in range(iterations):
-            string = cached_expand_string(string, rules)
+        if self.turtle_string_creation:
+            self.turtle_string_creation.stop_creating()
+            self.turtle_string_creation.join()
 
-        # Make turtle
-        t = Turtle(string, angle, placeholders=["1","2","3","4"], null_characters=constants)
-
-        self.cv.delete("all")
-
-        self.cv.draw_turtle(t, colors={"1": self.color1, "2": self.color2, "3": self.color3, "4": self.color4})
+        self.turtle_string_creation = CreateTurtleString(string, rules, iterations)
+        self.turtle_string_creation.start()
+        self.status_text.set("Creating turtle string")
+        self.after(100, self.render_image_continue)
 
     def fill_entries(self, it="", ang="", cons="", axi="", r1="", r2="", r3="", r4=""):
 
