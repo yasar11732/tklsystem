@@ -56,7 +56,7 @@ class DrawTurtle(Thread):
     def run(self):
 
         self.canvas.begin_new()
-        color = "#000000" # default color
+        color = self.colors["1"]
 
         # Calculate size, and scale to fill the frame
         t_width = self.turtle.rightmost[0] - self.turtle.leftmost[0]

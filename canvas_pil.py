@@ -80,7 +80,7 @@ class DrawTurtle(Thread):
         self.canvas.begin_new()
         im_draw = ImageDraw(self.canvas.pil_image)
 
-        color = "#000000" # default color
+        color = self.colors["1"]
 
         # Calculate size, and scale to fill the frame
         t_width = turtle.rightmost[0] - turtle.leftmost[0]

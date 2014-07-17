@@ -15,6 +15,7 @@ else:
 import tkinter as tk
 import tkinter.filedialog
 import tkinter.messagebox
+import tkinter.colorchooser
 
 from l_system_utils import cached_expand_string
 from lsturtle import Turtle
