@@ -16,6 +16,7 @@ import hashlib
 
 image_cache_dir = join(tempfile.gettempdir(), "lsd_pil_images")
 
+
 class TurtleCanvas(tk.Canvas):
 
     def __init__(self, master, *args, **kwargs):
@@ -27,12 +28,13 @@ class TurtleCanvas(tk.Canvas):
         self.c_width = int(self['width'])
         self.c_height = int(self['height'])
         
-        self.pil_image = Image.new("RGB", (self.c_width, self.c_height), (255,255,255))
+        self.pil_image = Image.new("RGB", (self.c_width, self.c_height), (255, 255, 255))
+        self.photo_image = ImageTk.PhotoImage(self.pil_image)
         self.update_this()
 
     def begin_new(self):
         with self._change_state:
-            self.pil_image = Image.new("RGB", (self.c_width, self.c_height), (255,255,255))
+            self.pil_image = Image.new("RGB", (self.c_width, self.c_height), (255, 255, 255))
 
     def set_image(self, new_image):
         with self._change_state:
@@ -43,6 +45,10 @@ class TurtleCanvas(tk.Canvas):
             self._update_image.set()
 
     def update_this(self):
+        """
+
+        :rtype : None
+        """
         if self._update_image.isSet():
             with self._change_state:
                 self.photo_image = ImageTk.PhotoImage(self.pil_image)
@@ -53,6 +59,7 @@ class TurtleCanvas(tk.Canvas):
         self.update_idletasks()
         self.after(100, self.update_this)
     
+
 class DrawTurtle(Thread):
 
     def __init__(self, canvas, turtle, colors={}, **kwargs):
@@ -64,12 +71,11 @@ class DrawTurtle(Thread):
         self.turtle = turtle
         self.colors = colors
 
-
     def stop_drawing(self):
         self._stop_drawing.set()
     
     "Draw directly on tkinter canvas"
-    def run(self): # no need to overwrite parent's init
+    def run(self):  # no need to overwrite parent's init
 
         turtle = self.turtle
         colors = self.colors
@@ -86,17 +92,16 @@ class DrawTurtle(Thread):
         t_width = turtle.rightmost[0] - turtle.leftmost[0]
         t_height = turtle.bottommost[1] - turtle.topmost[1]
 
-        if t_width / t_height > 1: # fat image scale according to width
+        if t_width / t_height > 1:  # fat image scale according to width
             scale_factor = self.canvas.c_width / t_width
         else:
             scale_factor = self.canvas.c_height / t_height
 
-
-        left_margin = (self.canvas.c_width - scale_factor*t_width)  / 2
-        top_margin  = (self.canvas.c_height - scale_factor*t_height) / 2
+        left_margin = (self.canvas.c_width - scale_factor*t_width) / 2
+        top_margin = (self.canvas.c_height - scale_factor*t_height) / 2
 
         x_shift = left_margin - scale_factor*turtle.leftmost[0]
-        y_shift = top_margin  - scale_factor*turtle.topmost[1]
+        y_shift = top_margin - scale_factor*turtle.topmost[1]
         
         coordinates = []
 
@@ -122,7 +127,7 @@ class DrawTurtle(Thread):
             if i > 3000:
                 self.canvas.update_image()
                 i = 0
-            if isinstance(item, PlaceHolder): # not a list of coordinates
+            if isinstance(item, PlaceHolder):  # not a list of coordinates
                 if item.value in colors:
                     color = colors[item.value]
             else:
@@ -135,7 +140,7 @@ class DrawTurtle(Thread):
     def get_cache_filename(self):
         m = hashlib.sha256()
         m.update(str(self.turtle.angle).encode('utf-8'))
-        m.update(";".join("{}:{}".format(x,y) for x,y in self.colors.items()).encode('utf-8'))
+        m.update(";".join("{}:{}".format(x, y) for x, y in self.colors.items()).encode('utf-8'))
         m.update(self.turtle.string.encode('utf-8'))
 
         return join(image_cache_dir, m.hexdigest() + ".jpg")
@@ -153,7 +158,6 @@ class DrawTurtle(Thread):
         print("Loaded image from cache")
         return True
 
-    
     def save_to_cache(self):
         print("Saving image to cache")
 
@@ -163,6 +167,3 @@ class DrawTurtle(Thread):
             makedirs(image_cache_dir)
             
         self.canvas.pil_image.save(filename)
-
-
-        

@@ -25,9 +25,9 @@ from threading import Thread, Event
 import sys
 
 ## To fill filebrowswer
-from os import makedirs
 from os.path import expanduser, isdir, basename, join
 from glob import glob
+
 
 class CreateTurtleString(Thread):
 
@@ -60,7 +60,6 @@ class CreateTurtleString(Thread):
         self._job_done.set()
 
         
-    
 class Main(tk.Frame):
 
     w = 600
@@ -98,17 +97,17 @@ class Main(tk.Frame):
         if not isdir(self.lsf_dir):
             from shutil import copytree
             from os.path import dirname
-            examples = join(dirname(__file__),"examples")
+            examples = join(dirname(__file__), "examples")
             copytree(examples, self.lsf_dir)
 
         self.entries = tk.Frame(self)
         self.entries.grid(row=0, column=0, sticky=tk.N)
         ### Labels ###
         tk.Label(self.entries, text="Settings", font="Helvetica 14 bold").grid(column=0, row=0, sticky=tk.W)
-        tk.Label(self.entries, text="Iterations").grid(column=0,row=1, padx=5, pady=5)
-        tk.Label(self.entries, text="angle").grid(column=0,row=2, padx=5, pady=5)
-        tk.Label(self.entries, text="axiom").grid(column=0,row=3, padx=5, pady=5)
-        tk.Label(self.entries, text="rule1").grid(column=0,row=4, padx=5, pady=5)
+        tk.Label(self.entries, text="Iterations").grid(column=0, row=1, padx=5, pady=5)
+        tk.Label(self.entries, text="angle").grid(column=0, row=2, padx=5, pady=5)
+        tk.Label(self.entries, text="axiom").grid(column=0, row=3, padx=5, pady=5)
+        tk.Label(self.entries, text="rule1").grid(column=0, row=4, padx=5, pady=5)
         tk.Label(self.entries, text="rule2").grid(column=0, row=5, padx=5, pady=5)
         tk.Label(self.entries, text="rule3").grid(column=0, row=6, padx=5, pady=5)
         tk.Label(self.entries, text="rule4").grid(column=0, row=7, padx=5, pady=5)
@@ -119,21 +118,25 @@ class Main(tk.Frame):
         tk.Label(self.entries, text="color 3:").grid(column=0, row=12, padx=5, pady=5)
         tk.Label(self.entries, text="color 4:").grid(column=0, row=13, padx=5, pady=5)
 
-        
         ### Entries ###
-        tk.Entry(self.entries, textvariable=self.iterations).grid(column=1,row=1)
-        tk.Entry(self.entries, textvariable=self.angle).grid(column=1,row=2)
-        tk.Entry(self.entries, textvariable=self.axiom).grid(column=1,row=3)
-        tk.Entry(self.entries, textvariable=self.rule1).grid(column=1,row=4)
+        tk.Entry(self.entries, textvariable=self.iterations).grid(column=1, row=1)
+        tk.Entry(self.entries, textvariable=self.angle).grid(column=1, row=2)
+        tk.Entry(self.entries, textvariable=self.axiom).grid(column=1, row=3)
+        tk.Entry(self.entries, textvariable=self.rule1).grid(column=1, row=4)
         tk.Entry(self.entries, textvariable=self.rule2).grid(column=1, row=5)
         tk.Entry(self.entries, textvariable=self.rule3).grid(column=1, row=6)
         tk.Entry(self.entries, textvariable=self.rule4).grid(column=1, row=7)
         tk.Entry(self.entries, textvariable=self.constants).grid(column=1, row=8)
         ## Color settings
-        self.c1_label = tk.Label(self.entries, text=self.color1, bg=self.color1);self.c1_label.grid(column=1, row=10)
-        self.c2_label = tk.Label(self.entries, text=self.color2, bg=self.color2);self.c2_label.grid(column=1, row=11)
-        self.c3_label = tk.Label(self.entries, text=self.color3, bg=self.color3);self.c3_label.grid(column=1, row=12)
-        self.c4_label = tk.Label(self.entries, text=self.color4, bg=self.color4);self.c4_label.grid(column=1, row=13)
+        self.c1_label = tk.Label(self.entries, text=self.color1, bg=self.color1)
+        self.c2_label = tk.Label(self.entries, text=self.color2, bg=self.color2)
+        self.c3_label = tk.Label(self.entries, text=self.color3, bg=self.color3)
+        self.c4_label = tk.Label(self.entries, text=self.color4, bg=self.color4)
+
+        self.c1_label.grid(column=1, row=10)
+        self.c2_label.grid(column=1, row=11)
+        self.c3_label.grid(column=1, row=12)
+        self.c4_label.grid(column=1, row=13)
 
         self.c1_label.bind("<Button-1>", lambda _: self.pick_color("color1", self.c1_label))
         self.c2_label.bind("<Button-1>", lambda _: self.pick_color("color2", self.c2_label))
@@ -152,15 +155,17 @@ class Main(tk.Frame):
             save_im_button['state'] = tk.DISABLED
 
         save_im_button.grid(column=3, row=0)
+
+        self.files = {}
         
         ### File List ###
         self.right = tk.Frame(self)
         self.right.grid(row=0, column=2, sticky=(tk.N+tk.S))
         self.fscroll = tk.Scrollbar(self.right)
-        self.fscroll.grid(row=0,column=1, sticky=(tk.N+tk.S))
+        self.fscroll.grid(row=0, column=1, sticky=(tk.N+tk.S))
 
         self.filebrowser = tk.Listbox(self.right, yscrollcommand=self.fscroll.set, height=20)
-        self.filebrowser.grid(row=0,column=0)
+        self.filebrowser.grid(row=0, column=0)
 
         self.fscroll.config(command=self.filebrowser.yview)
 
@@ -185,18 +190,17 @@ class Main(tk.Frame):
         except IndexError:
             pass
 
-    def load_selected_file(self, event):
+    def load_selected_file(self, _):
         sel = self.filebrowser.curselection()
         fpath = self.files[self.filebrowser.get(sel[0])]
         self.load_from_file(fpath)
 
     def fill_file_browser(self):
-        self.files = {}
 
         for f in glob(join(self.lsf_dir, "*.lsf")):
             fname = basename(f)
             self.files[fname] = f
-            self.filebrowser.insert(0,fname)
+            self.filebrowser.insert(0, fname)
 
     def pick_color(self, colorname, label):
 
@@ -208,12 +212,12 @@ class Main(tk.Frame):
         setattr(self, colorname, new_color)
 
         label['text'] = new_color
-        label['bg']   = new_color
+        label['bg'] = new_color
 
     def save_to_file(self):
 
         fn = tk.filedialog.asksaveasfilename(initialdir=self.lsf_dir,
-                                             filetypes=(('L-System Formula File','*.lsf'), ('All files', '*.*')))
+                                             filetypes=(('L-System Formula File', '*.lsf'), ('All files', '*.*')))
 
         if not fn:
             return
@@ -222,7 +226,7 @@ class Main(tk.Frame):
             fn += ".lsf"
 
         try:
-            with open(fn,"w") as f:
+            with open(fn, "w") as f:
                 f.write("\n".join((self.iterations.get(),
                                   self.angle.get(),
                                   self.axiom.get(),
@@ -238,7 +242,7 @@ class Main(tk.Frame):
     def load_from_file(self, fname=None):
         if not fname:
             fname = tk.filedialog.askopenfilename(initialdir=self.lsf_dir,
-                                                  filetypes = (("L-System Formula","*.lsf"),("all files","*.*")))
+                                                  filetypes=(("L-System Formula", "*.lsf"), ("all files", "*.*")))
 
         with open(fname, "r") as f:
 
@@ -256,18 +260,21 @@ class Main(tk.Frame):
 
     def save_image(self):
 
-        with tk.filedialog.asksaveasfile(filetypes=(('Jpeg Image','*.jpg;*.jpeg;*.JPEG;*.JPG'),
-                                                    ('Bitmap Image','*.bmp'),
-                                                    ('Png Image','*.png'))) as f:
+        with tk.filedialog.asksaveasfile(filetypes=(('Jpeg Image', '*.jpg;*.jpeg;*.JPEG;*.JPG'),
+                                                    ('Bitmap Image', '*.bmp'),
+                                                    ('Png Image', '*.png'))) as f:
             self.cv.pil_image.save(f)
 
-        
-
+    @property
     def get_rules(self):
+        """
+        :rtype : dict
+        :return: dictionary of l-system rules
+        """
         rules = dict()
         
-        for r in ("rule1","rule2","rule3","rule4"):
-            text = getattr(self,r).get()
+        for r in ("rule1", "rule2", "rule3", "rule4"):
+            text = getattr(self, r).get()
             if ":" in text:
                 kv = text.split(":")
                 rules[kv[0]] = "".join(kv[1:])
@@ -277,42 +284,51 @@ class Main(tk.Frame):
     def render_image_continue(self):
         if self.turtle_string_creation.job_done():
             self.status_text.set("Rendering image")
-            angle      = int(self.angle.get())
-            constants  = self.constants.get()
+            angle = int(self.angle.get())
+            constants = self.constants.get()
             
-            t = Turtle(self.turtle_string_creation.string, angle, placeholders=["1","2","3","4"], null_characters=constants)
+            t = Turtle(self.turtle_string_creation.string,
+                       angle,
+                       placeholders=["1", "2", "3", "4"],
+                       null_characters=constants)
+
             if self.drawing_thread:
                 self.drawing_thread.stop_drawing()
                 self.drawing_thread.join()
 
-            self.drawing_thread = DrawTurtle(self.cv, t, colors={"1": self.color1, "2": self.color2, "3": self.color3, "4": self.color4}, daemon=True)
+            self.drawing_thread = DrawTurtle(self.cv,
+                                             t,
+                                             colors={"1": self.color1,
+                                                     "2": self.color2,
+                                                     "3": self.color3,
+                                                     "4": self.color4},
+                                             daemon=True)
             self.drawing_thread.start()
         else:
             self.after(100, self.render_image_continue)
             
     def render_image(self):
-        angle      = self.angle.get()
+        angle = self.angle.get()
         iterations = self.iterations.get()
-        string      = self.axiom.get()
-        rules      = self.get_rules()
-        
+        string = self.axiom.get()
+        rules = self.get_rules
 
         try:
             iterations = int(iterations)
         except ValueError:
-            tk.messagebox.showerror("Missing Information","You didn't specify iterations")
+            tk.messagebox.showerror("Missing Information", "You didn't specify iterations")
             return
 
         try:
-            angle = int(angle)
+            int(angle)
         except ValueError:
-            tk.messagebox.showerror("Missing Information","You didn't specify angle")
+            tk.messagebox.showerror("Missing Information", "You didn't specify angle")
             return
 
         if iterations > 15:
-            if not tk.messagebox.askyesno("Iterations too high","Number of iterations is"
-                                                                "too high. This might cause performance problems."
-                                                                "Are you sure about this?"):
+            if not tk.messagebox.askyesno("Iterations too high", "Number of iterations is"
+                                                                 "too high. This might cause performance problems."
+                                                                 "Are you sure about this?"):
                 return
 
         # Produce string

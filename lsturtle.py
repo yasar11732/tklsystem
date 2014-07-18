@@ -1,23 +1,25 @@
 from math import sin, cos, radians
 from l_system_utils import PlaceHolder
 
+
 class Turtle(object):
 
     def __init__(self, instructions, angle, placeholders=[], null_characters=[]):
         """
-        @param placeholders: they don't change turtle's state, but will be inserted into coordinate list as additional information.
+        @param placeholders: they don't change turtle's state, but will be inserted
+        into coordinate list as additional information.
 
-        @param dummy_actions: list of characters that don't do anything. These can be useful when generating the string, but
-        they are not directives for turtle
+        @param null_characters: list of characters that don't do anything.
+        These can be useful when generating the string, but they are not directives for turtle
         """
         self.directives = {
-            "j":"jump",
-            "+":"right",
-            "-":"left",
-            "U":"up", # Untl pencil is down again, nothing will be drawn
-            "D":"down",
-            "[":"push",
-            "]":"pop",
+            "j": "jump",
+            "+": "right",
+            "-": "left",
+            "U": "up",  # Until pencil is down again, nothing will be drawn
+            "D": "down",
+            "[": "push",
+            "]": "pop",
         }
 
         self.string = instructions
@@ -25,18 +27,18 @@ class Turtle(object):
         self.placeholders = placeholders
         self.null_characters = null_characters
         
-        self._pos = (0,0)
+        self._pos = (0, 0)
         self._heading = 0
 
         self.pendown = True
 
-        self._stack = [] # stack of saved position/angles
+        self._stack = []  # stack of saved position/angles
 
         # coordinates of border points
-        self.leftmost = (0,0) 
-        self.rightmost = (0,0) 
-        self.topmost = (0,0)
-        self.bottommost = (0,0)
+        self.leftmost = (0, 0)
+        self.rightmost = (0, 0)
+        self.topmost = (0, 0)
+        self.bottommost = (0, 0)
 
         """
         _lines: list of tuples of coordinates with placeholders. Looks like,
@@ -48,7 +50,6 @@ class Turtle(object):
 
         self.run()
         
-
     def run(self):
         for x in self.string:
             try:
@@ -60,9 +61,8 @@ class Turtle(object):
                 elif x in self.placeholders:
                     self.lines.append(PlaceHolder(x))
                 else:
-                    self.forward() # Otherwise, we assume this actions is forward
+                    self.forward()  # Otherwise, we assume this actions is forward
                 
-
     def forward(self):
         x, y = self._pos
         x2, y2 = (x + cos(radians(self._heading)), y + sin(radians(self._heading)))
@@ -82,13 +82,19 @@ class Turtle(object):
             self.bottommost = self._pos
         
         if self.pendown:
-            self.lines.append(tuple((x,y,x2,y2)))
+            self.lines.append(tuple((x, y, x2, y2)))
 
-    def right(self): self._heading += self.angle
-    def left(self):  self._heading -= self.angle
+    def right(self):
+        self._heading += self.angle
 
-    def up(self): self.pendown = False
-    def down(self): self.pendown = True
+    def left(self):
+        self._heading -= self.angle
+
+    def up(self):
+        self.pendown = False
+
+    def down(self):
+        self.pendown = True
 
     def jump(self):
         penstate = self.pendown
@@ -96,7 +102,9 @@ class Turtle(object):
         self.forward()
         self.pendown = penstate
     
-    def push(self): self._stack.append((self._pos, self._heading))
+    def push(self):
+        self._stack.append((self._pos, self._heading))
 
 
-    def pop(self): self._pos, self._heading = self._stack.pop()
+    def pop(self):
+        self._pos, self._heading = self._stack.pop()

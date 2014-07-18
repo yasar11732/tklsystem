@@ -1,15 +1,16 @@
 import hashlib
-from os.path import join, isdir, isfile, dirname
+from os.path import join, isdir, isfile
 from os import makedirs
 from tempfile import gettempdir
 
 cachedir = join(gettempdir(), "lsd-cache")
-print("cachedir: ", cachedir)
+
 
 def serialize_l_system(string, rules):
-    items = [(k,v) for k,v in rules.items()]
-    items.sort(key=lambda k:k[0])
-    return string + ";" + ";".join("{}:{}".format(k,v) for k,v in items)
+    items = [(k, v) for k, v in rules.items()]
+    items.sort(key=lambda k: k[0])
+    return string + ";" + ";".join("{}:{}".format(k, v) for k, v in items)
+
 
 def expand_string(string, rules):
     parts = []
@@ -20,12 +21,12 @@ def expand_string(string, rules):
             parts.append(x)
     return "".join(parts)
 
+
 def cached_expand_string(string, rules):
 
     # don't cache minimal strings to decrase I/O time
     if not len(string) > 5000:
         return expand_string(string, rules)
-
 
     if not isdir(cachedir):
         makedirs(cachedir)
@@ -45,7 +46,8 @@ def cached_expand_string(string, rules):
             f.write(value)
         return value
 
+
 class PlaceHolder(object):
-    "So that we can track what is a placeholder"
+    """So that we can track what is a placeholder"""
     def __init__(self, value):
         self.value = value

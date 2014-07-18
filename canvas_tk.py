@@ -6,11 +6,13 @@ from queue import Queue, Empty
 import tkinter as tk
 from l_system_utils import PlaceHolder
     
+
 class TurtleCanvas(tk.Canvas):
 
     def __init__(self, master, *args, **kwargs):
 
         tk.Canvas.__init__(self, master, *args, **kwargs)
+        self.pil_image = None
         self._q = Queue()
         self._cancel_current = Event()
         self.update_this()
@@ -24,13 +26,12 @@ class TurtleCanvas(tk.Canvas):
 
     def update_this(self):
         try:
-            for i in range(4000): # draw 2000 lines at a cycle
+            for i in range(4000):  # draw 2000 lines at a cycle
                 line, color = self._q.get_nowait()
                 if line is None:
                     self.delete('all')
                     continue
                 self.create_line(*line, fill=color)
-                
 
         except Empty:
             pass
@@ -65,17 +66,16 @@ class DrawTurtle(Thread):
         c_width = int(self.canvas['width'])
         c_height = int(self.canvas['height'])
 
-        if t_width / t_height > 1: # fat image scale according to width
+        if t_width / t_height > 1:  # fat image scale according to width
             scale_factor = c_width / t_width
         else:
             scale_factor = c_height / t_height
 
-
-        left_margin = (c_width - scale_factor*t_width)  / 2
-        top_margin  = (c_height - scale_factor*t_height) / 2
+        left_margin = (c_width - scale_factor*t_width) / 2
+        top_margin = (c_height - scale_factor*t_height) / 2
 
         x_shift = left_margin - scale_factor*self.turtle.leftmost[0]
-        y_shift = top_margin  - scale_factor*self.turtle.topmost[1]
+        y_shift = top_margin - scale_factor*self.turtle.topmost[1]
         
         coordinates = []
 
@@ -93,18 +93,8 @@ class DrawTurtle(Thread):
         for item in coordinates:
             if self._stop_drawing.isSet():
                 return
-            if isinstance(item, PlaceHolder): # not a list of coordinates
+            if isinstance(item, PlaceHolder):  # not a list of coordinates
                 if item.value in self.colors:
                     color = self.colors[item.value]
             else:
                 self.canvas.queue_line(item, color)
-
-
-
-
-
-    
-
-        
-        
-        
