@@ -6,7 +6,7 @@ from threading import Thread, Lock, Event
 from PIL import Image, ImageTk
 from PIL.ImageDraw import ImageDraw
 
-from l_system_utils import PlaceHolder
+from lsystem.l_system_utils import PlaceHolder
 
 import tempfile
 from os.path import join, isdir, isfile

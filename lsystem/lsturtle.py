@@ -1,5 +1,5 @@
 from math import sin, cos, radians
-from l_system_utils import PlaceHolder
+from lsystem.l_system_utils import PlaceHolder
 
 
 class Turtle(object):

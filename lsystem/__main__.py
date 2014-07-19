@@ -8,24 +8,25 @@ except ImportError:
 # _pil_available = False
 
 if _pil_available:
-    from canvas_pil import TurtleCanvas, DrawTurtle
+    from lsystem.canvas_pil import TurtleCanvas, DrawTurtle
 else:
-    from canvas_tk import TurtleCanvas, DrawTurtle
+    from lsystem.canvas_tk import TurtleCanvas, DrawTurtle
 
 import tkinter as tk
 import tkinter.filedialog
 import tkinter.messagebox
 import tkinter.colorchooser
 
-from l_system_utils import cached_expand_string
-from lsturtle import Turtle
+from lsystem.l_system_utils import cached_expand_string
+from lsystem.lsturtle import Turtle
 
 from threading import Thread, Event
 
 import sys
 
 ## To fill filebrowswer
-from os.path import expanduser, isdir, basename, join
+from os.path import expanduser, isdir, basename, dirname, join
+from os import makedirs
 from glob import glob
 
 
@@ -95,10 +96,9 @@ class Main(tk.Frame):
 
         self.lsf_dir = expanduser(join("~", "lsf-files"))
         if not isdir(self.lsf_dir):
-            from shutil import copytree
-            from os.path import dirname
-            examples = join(dirname(__file__), "examples")
-            copytree(examples, self.lsf_dir)
+            makedirs(self.lsf_dir)
+
+        self.example_dir = join(dirname(__file__), "examples")
 
         self.entries = tk.Frame(self)
         self.entries.grid(row=0, column=0, sticky=tk.N)
@@ -172,6 +172,8 @@ class Main(tk.Frame):
         self.filebrowser.bind("<<ListboxSelect>>", self.load_selected_file)
         self.fill_file_browser()
 
+        tk.Button(self.right, text="Reset File List", command=self.fill_file_browser).grid(row=1, column=0)
+
         ### Canvas ###
         self.cv = TurtleCanvas(self, width=self.w, height=self.h, bg='white')
         self.cv.grid(column=1, row=0)
@@ -197,10 +199,13 @@ class Main(tk.Frame):
 
     def fill_file_browser(self):
 
-        for f in glob(join(self.lsf_dir, "*.lsf")):
-            fname = basename(f)
-            self.files[fname] = f
-            self.filebrowser.insert(0, fname)
+        root_dirs = (self.lsf_dir, self.example_dir)
+
+        for directory in root_dirs:
+            for f in glob(join(directory, "*.lsf")):
+                fname = basename(f)
+                self.files[fname] = f
+                self.filebrowser.insert(0, fname)
 
     def pick_color(self, colorname, label):
 
@@ -244,6 +249,8 @@ class Main(tk.Frame):
             fname = tk.filedialog.askopenfilename(initialdir=self.lsf_dir,
                                                   filetypes=(("L-System Formula", "*.lsf"), ("all files", "*.*")))
 
+        if not fname:  # User can click cancel
+            return
         with open(fname, "r") as f:
 
             x = f.readlines()
@@ -356,8 +363,11 @@ class Main(tk.Frame):
 
         self.parent.mainloop()
 
-if __name__ == "__main__":
+def main():
     root = tk.Tk()
     app = Main(root)
     root.bind("<Return>", lambda _: app.render_image())
     app.run()
+
+if __name__ == "__main__":
+	sys.exit(main())
