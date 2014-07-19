@@ -1,5 +1,6 @@
 # -*- coding: utf-8 -*-
 import hashlib
+import lzma
 from os.path import join, isdir, isfile
 from os import makedirs
 from tempfile import gettempdir
@@ -36,15 +37,15 @@ def cached_expand_string(string, rules):
 
     serialized_system = serialize_l_system(string, rules)
     m.update(serialized_system.encode('utf-8'))
-    cachefile = join(cachedir, m.hexdigest())
+    cachefile = join(cachedir, '{}.xz'.format(m.hexdigest()))
 
     if isfile(cachefile):
-        with open(cachefile) as f:
-            return f.read()
+        with lzma.open(cachefile) as f:
+            return f.read().decode('utf-8')
     else:
         value = expand_string(string, rules)
-        with open(cachefile, "w") as f:
-            f.write(value)
+        with lzma.open(cachefile, "w") as f:
+            f.write(value.encode('utf-8'))
         return value
 
 
