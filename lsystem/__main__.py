@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 _pil_available = True
 try:
     import PIL
@@ -12,10 +13,16 @@ if _pil_available:
 else:
     from lsystem.canvas_tk import TurtleCanvas, DrawTurtle
 
-import tkinter as tk
-import tkinter.filedialog
-import tkinter.messagebox
-import tkinter.colorchooser
+try:
+    import tkinter as tk
+    import tkinter.filedialog
+    import tkinter.messagebox
+    import tkinter.colorchooser
+except ImportError:
+    import Tkinter as tk
+    import Tkinter.filedialog
+    import Tkinter.messagebox
+    import Tkinter.colorchooser
 
 from lsystem.l_system_utils import cached_expand_string
 from lsystem.lsturtle import Turtle
@@ -60,12 +67,12 @@ class CreateTurtleString(Thread):
         self.string = string
         self._job_done.set()
 
-        
+
 class Main(tk.Frame):
 
     w = 600
     h = 600
-    
+
     def __init__(self, parent, *args, **kwargs):
         tk.Frame.__init__(self, parent, *args, **kwargs)
 
@@ -157,7 +164,7 @@ class Main(tk.Frame):
         save_im_button.grid(column=3, row=0)
 
         self.files = {}
-        
+
         ### File List ###
         self.right = tk.Frame(self)
         self.right.grid(row=0, column=2, sticky=(tk.N+tk.S))
@@ -213,7 +220,7 @@ class Main(tk.Frame):
 
         # discard (r,g,b) and use #rrggbb instead
         _, new_color = tk.colorchooser.askcolor(initialcolor=old_color, title="Pick a color")
-        
+
         setattr(self, colorname, new_color)
 
         label['text'] = new_color
@@ -226,7 +233,7 @@ class Main(tk.Frame):
 
         if not fn:
             return
-        
+
         if not fn.endswith(".lsf"):
             fn += ".lsf"
 
@@ -242,7 +249,7 @@ class Main(tk.Frame):
                                   self.constants.get(),
                                    "EOF")))
         except Exception as e:
-            tkinter.messagebox.showerror("Couldn't save", e)
+            tk.messagebox.showerror("Couldn't save", e)
 
     def load_from_file(self, fname=None):
         if not fname:
@@ -279,7 +286,7 @@ class Main(tk.Frame):
         :return: dictionary of l-system rules
         """
         rules = dict()
-        
+
         for r in ("rule1", "rule2", "rule3", "rule4"):
             text = getattr(self, r).get()
             if ":" in text:
@@ -293,7 +300,7 @@ class Main(tk.Frame):
             self.status_text.set("Rendering image")
             angle = int(self.angle.get())
             constants = self.constants.get()
-            
+
             t = Turtle(self.turtle_string_creation.string,
                        angle,
                        placeholders=["1", "2", "3", "4"],
@@ -313,7 +320,7 @@ class Main(tk.Frame):
             self.drawing_thread.start()
         else:
             self.after(100, self.render_image_continue)
-            
+
     def render_image(self):
         angle = self.angle.get()
         iterations = self.iterations.get()
@@ -370,4 +377,4 @@ def main():
     app.run()
 
 if __name__ == "__main__":
-	sys.exit(main())
+    sys.exit(main())

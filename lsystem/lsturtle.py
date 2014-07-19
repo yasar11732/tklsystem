@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 from math import sin, cos, radians
 from lsystem.l_system_utils import PlaceHolder
 
@@ -26,7 +27,7 @@ class Turtle(object):
         self.angle = angle
         self.placeholders = placeholders
         self.null_characters = null_characters
-        
+
         self._pos = (0, 0)
         self._heading = 0
 
@@ -49,7 +50,7 @@ class Turtle(object):
         self.lines = []
 
         self.run()
-        
+
     def run(self):
         for x in self.string:
             try:
@@ -62,7 +63,7 @@ class Turtle(object):
                     self.lines.append(PlaceHolder(x))
                 else:
                     self.forward()  # Otherwise, we assume this actions is forward
-                
+
     def forward(self):
         x, y = self._pos
         x2, y2 = (x + cos(radians(self._heading)), y + sin(radians(self._heading)))
@@ -80,7 +81,7 @@ class Turtle(object):
 
         if y2 > self.bottommost[1]:
             self.bottommost = self._pos
-        
+
         if self.pendown:
             self.lines.append(tuple((x, y, x2, y2)))
 
@@ -101,7 +102,7 @@ class Turtle(object):
         self.pendown = False
         self.forward()
         self.pendown = penstate
-    
+
     def push(self):
         self._stack.append((self._pos, self._heading))
 

@@ -1,6 +1,11 @@
+# -*- coding: utf-8 -*-
 from __future__ import division
 
-import tkinter as tk
+try:
+    import tkinter as tk
+except ImportError:
+    import Tkinter as tk
+
 from threading import Thread, Lock, Event
 
 from PIL import Image, ImageTk
@@ -27,7 +32,7 @@ class TurtleCanvas(tk.Canvas):
 
         self.c_width = int(self['width'])
         self.c_height = int(self['height'])
-        
+
         self.pil_image = Image.new("RGB", (self.c_width, self.c_height), (255, 255, 255))
         self.photo_image = ImageTk.PhotoImage(self.pil_image)
         self.update_this()
@@ -55,10 +60,10 @@ class TurtleCanvas(tk.Canvas):
                 self.delete('all')
                 self.create_image((self.c_width/2, self.c_height/2), image=self.photo_image)
                 self._update_image.clear()
-                
+
         self.update_idletasks()
         self.after(100, self.update_this)
-    
+
 
 class DrawTurtle(Thread):
 
@@ -73,13 +78,13 @@ class DrawTurtle(Thread):
 
     def stop_drawing(self):
         self._stop_drawing.set()
-    
+
     "Draw directly on tkinter canvas"
     def run(self):  # no need to overwrite parent's init
 
         turtle = self.turtle
         colors = self.colors
-        
+
         if self.load_from_cache():
             return
 
@@ -102,7 +107,7 @@ class DrawTurtle(Thread):
 
         x_shift = left_margin - scale_factor*turtle.leftmost[0]
         y_shift = top_margin - scale_factor*turtle.topmost[1]
-        
+
         coordinates = []
 
         for item in turtle.lines:
@@ -144,7 +149,7 @@ class DrawTurtle(Thread):
         m.update(self.turtle.string.encode('utf-8'))
 
         return join(image_cache_dir, m.hexdigest() + ".jpg")
-        
+
     def load_from_cache(self):
 
         filename = self.get_cache_filename()
@@ -165,5 +170,5 @@ class DrawTurtle(Thread):
 
         if not isdir(image_cache_dir):
             makedirs(image_cache_dir)
-            
+
         self.canvas.pil_image.save(filename)
