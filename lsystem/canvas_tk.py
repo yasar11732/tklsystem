@@ -4,7 +4,7 @@ from threading import Thread, Event
 from queue import Queue, Empty
 
 import tkinter as tk
-from l_system_utils import PlaceHolder
+from lsystem.l_system_utils import PlaceHolder
     
 
 class TurtleCanvas(tk.Canvas):
