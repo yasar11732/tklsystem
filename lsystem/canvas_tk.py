@@ -1,11 +1,16 @@
+# -*- coding: utf-8 -*-
 from __future__ import division
 
 from threading import Thread, Event
 from queue import Queue, Empty
 
-import tkinter as tk
+try:
+    import tkinter as tk
+except ImportError:
+    import Tkinter as tk
+
 from lsystem.l_system_utils import PlaceHolder
-    
+
 
 class TurtleCanvas(tk.Canvas):
 
@@ -35,10 +40,10 @@ class TurtleCanvas(tk.Canvas):
 
         except Empty:
             pass
-        
+
         self.update_idletasks()
         self.after(5, self.update_this)
-            
+
 
 class DrawTurtle(Thread):
 
@@ -53,7 +58,7 @@ class DrawTurtle(Thread):
 
     def stop_drawing(self):
         self._stop_drawing.set()
-        
+
     def run(self):
 
         self.canvas.begin_new()
@@ -76,7 +81,7 @@ class DrawTurtle(Thread):
 
         x_shift = left_margin - scale_factor*self.turtle.leftmost[0]
         y_shift = top_margin - scale_factor*self.turtle.topmost[1]
-        
+
         coordinates = []
 
         for item in self.turtle.lines:
@@ -89,7 +94,7 @@ class DrawTurtle(Thread):
                                     item[1]*scale_factor+y_shift,
                                     item[2]*scale_factor+x_shift,
                                     item[3]*scale_factor+y_shift))
-            
+
         for item in coordinates:
             if self._stop_drawing.isSet():
                 return

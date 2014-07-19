@@ -1,4 +1,2 @@
 include README.rst
 include LICENSE.txt
-include tklsystem.bat
-include tklsystem

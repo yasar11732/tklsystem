@@ -1,3 +1,4 @@
+# -*- coding: utf-8 -*-
 import hashlib
 from os.path import join, isdir, isfile
 from os import makedirs

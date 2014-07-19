@@ -1,26 +1,21 @@
-from distutils.core import setup
-import sys
+from setuptools import setup
 import lsystem
-
-if sys.platform.startswith('win'):
-	script_file = 'tklsystem.bat'
-else:
-	script_file = 'tklsystem'
-
-print(script_file)
-release = 5
 
 setup(
     name='TkLsystem',
-    version="{}-{}".format(lsystem.__version__, release),
+    version=lsystem.__version__,
     packages=['lsystem'],
-	package_data={'lsystem':['examples/*']},
+    package_data={'lsystem':['examples/*']},
     license=lsystem.__license__,
-	description=lsystem.__doc__,
+    description=lsystem.__doc__,
     long_description=open('README.rst').read(),
     url='https://github.com/yasar11732/tklsystem',
-	download_url='https://raw.githubusercontent.com/yasar11732/tklsystem/master/dist/lsystem-{}.zip'.format(lsystem.__version__),
+    download_url='https://raw.githubusercontent.com/yasar11732/tklsystem/master/dist/lsystem-{}.zip'.format(lsystem.__version__),
     author='Yaşar Arabacı',
     author_email='yasar11732@gmail.com',
-	scripts = [script_file]
+    entry_points = {
+        'console_scripts': [
+            'tklsystem = lsystem.__main__:main'
+        ]
+    },
 )
