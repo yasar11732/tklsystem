@@ -6,7 +6,9 @@ if sys.platform.startswith('win'):
 	script_file = 'tklsystem.bat'
 else:
 	script_file = 'tklsystem'
-release = 4
+
+print(script_file)
+release = 5
 
 setup(
     name='TkLsystem',
@@ -20,5 +22,5 @@ setup(
 	download_url='https://raw.githubusercontent.com/yasar11732/tklsystem/master/dist/lsystem-{}.zip'.format(lsystem.__version__),
     author='Yaşar Arabacı',
     author_email='yasar11732@gmail.com',
-	scripts = ['tklsystem']
+	scripts = [script_file]
 )
