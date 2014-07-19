@@ -1,1 +1,2 @@
-v0.2, 2014/07/19 -- Use lzma compression for cache files
+v0.2.1, 2014/07/20 -- Fix filebrowser refresh error
+v0.2.0, 2014/07/19 -- Use lzma compression for cache files

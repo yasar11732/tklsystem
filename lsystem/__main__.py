@@ -208,6 +208,9 @@ class Main(tk.Frame):
 
         root_dirs = (self.lsf_dir, self.example_dir)
 
+        self.files = {}
+        self.filebrowser.delete(0, tk.END)
+
         for directory in root_dirs:
             for f in glob(join(directory, "*.lsf")):
                 fname = basename(f)
