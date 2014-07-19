@@ -2,7 +2,10 @@
 from __future__ import division
 
 from threading import Thread, Event
-from queue import Queue, Empty
+try:
+	from queue import Queue, Empty
+except ImportError:
+	from Queue import Queue, Empty
 
 try:
     import tkinter as tk

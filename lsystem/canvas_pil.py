@@ -145,7 +145,7 @@ class DrawTurtle(Thread):
     def get_cache_filename(self):
         m = hashlib.sha256()
         m.update(str(self.turtle.angle).encode('utf-8'))
-        m.update(";".join("{}:{}".format(x, y) for x, y in self.colors.items()).encode('utf-8'))
+        m.update(";".join("{0}:{1}".format(x, y) for x, y in self.colors.items()).encode('utf-8'))
         m.update(self.turtle.string.encode('utf-8'))
 
         return join(image_cache_dir, m.hexdigest() + ".jpg")

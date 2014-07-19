@@ -20,9 +20,9 @@ try:
     import tkinter.colorchooser
 except ImportError:
     import Tkinter as tk
-    import Tkinter.filedialog
-    import Tkinter.messagebox
-    import Tkinter.colorchooser
+    import tkFileDialog as filedialog
+    import tkMessageBox as messagebox
+    import tkColorChooser as colorchooser
 
 from lsystem.l_system_utils import cached_expand_string
 from lsystem.lsturtle import Turtle
@@ -315,8 +315,8 @@ class Main(tk.Frame):
                                              colors={"1": self.color1,
                                                      "2": self.color2,
                                                      "3": self.color3,
-                                                     "4": self.color4},
-                                             daemon=True)
+                                                     "4": self.color4})
+            self.drawing_thread.daemon=True
             self.drawing_thread.start()
         else:
             self.after(100, self.render_image_continue)
