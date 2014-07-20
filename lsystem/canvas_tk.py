@@ -1,8 +1,11 @@
 # -*- coding: utf-8 -*-
-from __future__ import division
+# from __future__ import division
 
 from threading import Thread, Event
-from queue import Queue, Empty
+try:  # py3
+    from queue import Queue, Empty
+except ImportError:
+    from Queue import Queue, Empty
 
 try:
     import tkinter as tk
@@ -60,10 +63,8 @@ class DrawTurtle(Thread):
         self._stop_drawing.set()
 
     def run(self):
-
         self.canvas.begin_new()
         color = self.colors["1"]
-
         # Calculate size, and scale to fill the frame
         t_width = self.turtle.rightmost[0] - self.turtle.leftmost[0]
         t_height = self.turtle.bottommost[1] - self.turtle.topmost[1]

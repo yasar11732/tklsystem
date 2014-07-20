@@ -20,9 +20,9 @@ try:
     import tkinter.colorchooser
 except ImportError:
     import Tkinter as tk
-    import Tkinter.filedialog
-    import Tkinter.messagebox
-    import Tkinter.colorchooser
+    import tkFileDialog as filedialog
+    import tkMessageBox as messagebox
+    import tkColorChooser as colorchooser
 
 from lsystem.l_system_utils import cached_expand_string
 from lsystem.lsturtle import Turtle
@@ -222,7 +222,7 @@ class Main(tk.Frame):
         old_color = getattr(self, colorname)
 
         # discard (r,g,b) and use #rrggbb instead
-        _, new_color = tk.colorchooser.askcolor(initialcolor=old_color, title="Pick a color")
+        _, new_color = colorchooser.askcolor(initialcolor=old_color, title="Pick a color")
 
         setattr(self, colorname, new_color)
 
@@ -231,7 +231,7 @@ class Main(tk.Frame):
 
     def save_to_file(self):
 
-        fn = tk.filedialog.asksaveasfilename(initialdir=self.lsf_dir,
+        fn = filedialog.asksaveasfilename(initialdir=self.lsf_dir,
                                              filetypes=(('L-System Formula File', '*.lsf'), ('All files', '*.*')))
 
         if not fn:
@@ -252,11 +252,11 @@ class Main(tk.Frame):
                                   self.constants.get(),
                                    "EOF")))
         except Exception as e:
-            tk.messagebox.showerror("Couldn't save", e)
+            messagebox.showerror("Couldn't save", e)
 
     def load_from_file(self, fname=None):
         if not fname:
-            fname = tk.filedialog.askopenfilename(initialdir=self.lsf_dir,
+            fname = filedialog.askopenfilename(initialdir=self.lsf_dir,
                                                   filetypes=(("L-System Formula", "*.lsf"), ("all files", "*.*")))
 
         if not fname:  # User can click cancel
@@ -277,7 +277,7 @@ class Main(tk.Frame):
 
     def save_image(self):
 
-        with tk.filedialog.asksaveasfile(filetypes=(('Jpeg Image', '*.jpg;*.jpeg;*.JPEG;*.JPG'),
+        with filedialog.asksaveasfile(filetypes=(('Jpeg Image', '*.jpg;*.jpeg;*.JPEG;*.JPG'),
                                                     ('Bitmap Image', '*.bmp'),
                                                     ('Png Image', '*.png'))) as f:
             self.cv.pil_image.save(f)
@@ -318,8 +318,8 @@ class Main(tk.Frame):
                                              colors={"1": self.color1,
                                                      "2": self.color2,
                                                      "3": self.color3,
-                                                     "4": self.color4},
-                                             daemon=True)
+                                                     "4": self.color4})
+            self.drawing_thread.daemon = True
             self.drawing_thread.start()
         else:
             self.after(100, self.render_image_continue)
@@ -333,17 +333,17 @@ class Main(tk.Frame):
         try:
             iterations = int(iterations)
         except ValueError:
-            tk.messagebox.showerror("Missing Information", "You didn't specify iterations")
+            messagebox.showerror("Missing Information", "You didn't specify iterations")
             return
 
         try:
             int(angle)
         except ValueError:
-            tk.messagebox.showerror("Missing Information", "You didn't specify angle")
+            messagebox.showerror("Missing Information", "You didn't specify angle")
             return
 
         if iterations > 15:
-            if not tk.messagebox.askyesno("Iterations too high", "Number of iterations is"
+            if not messagebox.askyesno("Iterations too high", "Number of iterations is"
                                                                  "too high. This might cause performance problems."
                                                                  "Are you sure about this?"):
                 return
